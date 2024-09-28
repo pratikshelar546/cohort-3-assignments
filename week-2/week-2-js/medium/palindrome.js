@@ -4,7 +4,31 @@
 */
 
 function isPalindrome(str) {
+
+  let filterdText = '';
+
+  for (let char of str) {
+    if ((char >= 'a' && char <= 'z') || (char >= "A" && char <= "Z") || (char >= '0' && char <= '9')) {
+      filterdText += char.toLowerCase();
+    }
+  }
+
+  
+  
+  let left = 0;
+  let right = filterdText.length - 1;
+  
+  while (left < right) {
+    
+    if (filterdText[left] !== filterdText[right]) {
+      return false
+    }
+    left++;
+    right--;
+  }
+
   return true;
 }
+
 
 module.exports = isPalindrome;
