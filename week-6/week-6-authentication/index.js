@@ -17,8 +17,22 @@ const users = [];
 //     return token
 // }
 
+const authenticationMiddleWare = (req, res, next) => {
+    const token = req.headers.token;
+    const decodedToken = jwt.verify(token, JWT_SECRET);
+
+    if (decodedToken.userName) {
+        req.userName = decodedToken.userName;
+        next();
+    } else {
+        res.json({ message: "user not found" })
+    }
+}
 
 
+app.get("/", function (req, res) {
+    res.sendFile("D:/task/Cohort-3/cohort-3-assignments/week-6/week-6-authentication/public/index.html")
+})
 app.post("/signup", (req, res) => {
     const userName = req.body.userName;
     const password = req.body.password;
@@ -27,7 +41,7 @@ app.post("/signup", (req, res) => {
         userName: userName,
         password: password
     })
-    console.log(users);
+
 
     res.status(200).json({ message: "user created" });
 })
@@ -50,22 +64,18 @@ app.post("/signin", (req, res) => {
         res.status(404).json({ message: "User not found" });
     }
 
-    console.log(users);
 
 
 })
 
 
-app.get("/me", (req, res) => {
-    const token = req.headers.token;
-    const decodedData = jwt.verify(token, JWT_SECRET);
-    const userName = decodedData.userName;
-    const user = users.find(user => user.userName == userName);
+app.get("/me", authenticationMiddleWare, (req, res) => {
+    const user = users.find(user => user.userName == req.userName);
 
     if (user) {
         res.json({ user })
     } else {
-        res.json({ message: "USer not found" })
+        res.json({ message: " user not found 2s" })
     }
 })
 
