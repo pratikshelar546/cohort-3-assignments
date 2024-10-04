@@ -1,7 +1,13 @@
 const express = require("express");
 const JWT_SECRET = "lifehack";
 const jwt = require("jsonwebtoken");
+const { UserModel, TodoModel } = require("./db");
+const { default: mongoose } = require("mongoose");
 const app = express();
+const bcrypt = require("bcrypt");
+const { z } = require("zod");
+
+mongoose.connect("mongodb+srv://pratik25:Q9aj4I9BQU6SOYmR@cluster0.mfw2o.mongodb.net/todoapp")
 
 app.use(express.json());
 
@@ -21,8 +27,8 @@ const authenticationMiddleWare = (req, res, next) => {
     const token = req.headers.token;
     const decodedToken = jwt.verify(token, JWT_SECRET);
 
-    if (decodedToken.userName) {
-        req.userName = decodedToken.userName;
+    if (decodedToken.userId) {
+        req.userId = decodedToken.userId;
         next();
     } else {
         res.json({ message: "user not found" })
@@ -33,44 +39,106 @@ const authenticationMiddleWare = (req, res, next) => {
 app.get("/", function (req, res) {
     res.sendFile("D:/task/Cohort-3/cohort-3-assignments/week-6/week-6-authentication/public/index.html")
 })
-app.post("/signup", (req, res) => {
-    const userName = req.body.userName;
-    const password = req.body.password;
 
-    users.push({
-        userName: userName,
-        password: password
+
+app.post("/signup", async (req, res) => {
+    const bodyFormt = z.object({
+        email: z.string().min(5).max(30).email(),
+        password: z.string().min(3).max(30),
+        name: z.string()
     })
 
+    const parseDataWithSuccess = bodyFormt.safeParse(req.body);
 
-    res.status(200).json({ message: "user created" });
-})
+    if (!parseDataWithSuccess.success) {
+        console.log("successd");
+        
+        return   res.json({
+            message: "Invalid format"
+        })
 
-app.post("/signin", (req, res) => {
-
-    const userName = req.body.userName;
-    const password = req.body.password;
-
-    let user = users.find(user => user.userName == userName && user.password == password);
-
-    if (user) {
-        // const token = genrateToken();
-        const token = jwt.sign({
-            userName: userName
-        }, JWT_SECRET)
-
-        res.json({ token })
-    } else {
-        res.status(404).json({ message: "User not found" });
     }
 
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = await bcrypt.hash(req.body.password, 5);
+
+
+
+    try {
+        const userExist = await UserModel.findOne({
+            email: email
+        })
+        if (userExist) return res.json({ message: "user already exist with this email" });
+
+
+        await UserModel.create({
+            email: email,
+            name: name,
+            password: password
+        })
+
+        res.status(200).json({ message: `user created: ${name}` });
+    } catch (error) {
+        res.status(400).json({ message: error });
+    }
+    // users.push({
+    //     userName: userName,
+    //     password: password
+    // })
 
 
 })
 
+app.post("/signin", async (req, res) => {
 
-app.get("/me", authenticationMiddleWare, (req, res) => {
-    const user = users.find(user => user.userName == req.userName);
+    const bodyFormt = z.object({
+        email: z.string().min(5).max(30).email(),
+        password: z.string().min(3).max(30),
+        // name: z.string()
+    })
+
+    const parseDataWithSuccess = bodyFormt.safeParse(req.body);
+
+    if (!parseDataWithSuccess.success) {
+        console.log("successd");
+        
+        return   res.json({
+            message: "Invalid format"
+        })
+
+    }
+
+    const email = req.body.email;
+    const password = req.body.password;
+
+    try {
+        let user = await UserModel.findOne({
+            email: email
+        })
+
+        const paswordMatch = await bcrypt.compare(password, user.password);
+        console.log(user);
+
+        if (user && paswordMatch) {
+            // const token = genrateToken();
+            const token = jwt.sign({
+                userId: user._id
+            }, JWT_SECRET)
+            res.json({ token })
+        } else {
+            res.status(404).json({ message: "User not found" });
+        }
+
+    } catch (error) {
+        res.status(400).json({ message: error });
+    }
+})
+
+
+app.get("/me", authenticationMiddleWare, async (req, res) => {
+    const user = await UserModel.findById(req.userId);
+
 
     if (user) {
         res.json({ user })
@@ -78,5 +146,43 @@ app.get("/me", authenticationMiddleWare, (req, res) => {
         res.json({ message: " user not found 2s" })
     }
 })
+
+
+app.post("/addtodo", authenticationMiddleWare, async (req, res) => {
+    const userId = req.userId;
+    const title = req.body.title;
+    const done = req.body.done
+    console.log(userId);
+
+    try {
+        const existuser = await UserModel.findById(userId);
+        if (!existuser) {
+            return res.status(404).json({ message: "user not found" });
+        }
+
+        const todo = await TodoModel.create({
+            title: title,
+            userId: userId,
+            done: done
+        })
+        res.status(202).json({ message: "todo added", todo })
+    } catch (error) {
+        res.status(400).json({ message: error })
+    }
+})
+
+app.get("/todos", authenticationMiddleWare, async function (req, res) {
+    const userId = req.userId;
+
+    const todos = await TodoModel.find({
+        userId
+    }).populate('userId').exec();
+
+    res.json({
+        todos
+    })
+});
+
+
 
 app.listen(3000);
