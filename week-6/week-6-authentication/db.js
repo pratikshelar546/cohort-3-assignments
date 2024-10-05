@@ -18,8 +18,11 @@ const Todo = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: "user"
-    }
-})
+    },
+    deadLine: String
+},
+    { timestamps: true }
+)
 
 
 const UserModel = mongoose.model("user", User)

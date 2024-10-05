@@ -51,9 +51,7 @@ app.post("/signup", async (req, res) => {
     const parseDataWithSuccess = bodyFormt.safeParse(req.body);
 
     if (!parseDataWithSuccess.success) {
-        console.log("successd");
-        
-        return   res.json({
+        return res.json({
             message: "Invalid format"
         })
 
@@ -82,10 +80,7 @@ app.post("/signup", async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: error });
     }
-    // users.push({
-    //     userName: userName,
-    //     password: password
-    // })
+
 
 
 })
@@ -95,43 +90,41 @@ app.post("/signin", async (req, res) => {
     const bodyFormt = z.object({
         email: z.string().min(5).max(30).email(),
         password: z.string().min(3).max(30),
-        // name: z.string()
+
     })
 
     const parseDataWithSuccess = bodyFormt.safeParse(req.body);
 
     if (!parseDataWithSuccess.success) {
-        console.log("successd");
-        
-        return   res.json({
+        return res.json({
             message: "Invalid format"
         })
-
     }
 
     const email = req.body.email;
     const password = req.body.password;
 
     try {
-        let user = await UserModel.findOne({
-            email: email
-        })
+        const user = await UserModel.findOne({ email: email })
+        if (!user) {
+            return res.status(404).json({ message: "USer not found" });
+        }
 
         const paswordMatch = await bcrypt.compare(password, user.password);
-        console.log(user);
 
         if (user && paswordMatch) {
-            // const token = genrateToken();
             const token = jwt.sign({
-                userId: user._id
+                userId: user._id.toString()
             }, JWT_SECRET)
+            console.log(token, "token");
+
             res.json({ token })
         } else {
-            res.status(404).json({ message: "User not found" });
+            res.status(404).json({ message: "Inavlid credentials" });
         }
 
     } catch (error) {
-        res.status(400).json({ message: error });
+        res.status(400).json({ message: "Something went wrong" });
     }
 })
 
@@ -149,10 +142,21 @@ app.get("/me", authenticationMiddleWare, async (req, res) => {
 
 
 app.post("/addtodo", authenticationMiddleWare, async (req, res) => {
+
+    const bodyFormat = z.object({
+        title: z.string().min(3).max(100),
+        done: z.boolean(),
+        deadLine: z.string(),
+
+    })
     const userId = req.userId;
-    const title = req.body.title;
-    const done = req.body.done
-    console.log(userId);
+
+    const bodySafeParse = bodyFormat.safeParse(req.body);
+    if (!bodySafeParse) {
+        return res.json({ message: "Inavlid format of data" });
+    }
+
+    const { title, done, deadLine } = req.body
 
     try {
         const existuser = await UserModel.findById(userId);
@@ -163,7 +167,8 @@ app.post("/addtodo", authenticationMiddleWare, async (req, res) => {
         const todo = await TodoModel.create({
             title: title,
             userId: userId,
-            done: done
+            done: done,
+            deadLine: deadLine
         })
         res.status(202).json({ message: "todo added", todo })
     } catch (error) {
@@ -182,6 +187,20 @@ app.get("/todos", authenticationMiddleWare, async function (req, res) {
         todos
     })
 });
+
+app.put("/updateTodo/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const todo = await TodoModel.findById(id);
+        if (!todo) return res.json({ message: "todo not found" })
+        await TodoModel.findByIdAndUpdate(id, req.body);
+
+        res.status(200).json({ message: "Todo updated" })
+
+    } catch (error) {
+        res.status(404).json({ error })
+    }
+})
 
 
 
