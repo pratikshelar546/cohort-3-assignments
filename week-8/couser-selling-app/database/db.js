@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
 mongoose.connect(process.env.MONGODB_URL)
-
 const userSchema = new Schema({
     email: {
         type: String,
@@ -18,14 +16,11 @@ const userSchema = new Schema({
         required: true
     }
 })
-
 const jwt = require("jsonwebtoken");
 const jwt_secret = process.env.JWT_SECRET;
-
 userSchema.methods.genrateJwtToken = function () {
     return jwt.sign({ userId: this._id.toString() }, jwt_secret)
 }
-
 const adminSchema = new Schema({
     email: {
         type: String,
@@ -41,12 +36,9 @@ const adminSchema = new Schema({
         required: true
     }
 })
-
 adminSchema.methods.genrateJwtToken = function () {
     return jwt.sign({ adminId: this._id.toString() }, jwt_secret)
 }
-
-
 const couserSchema = new Schema({
     title: {
         type: String,
@@ -68,7 +60,6 @@ const couserSchema = new Schema({
         ref: "admin"
     }
 })
-
 const purchaseSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
@@ -83,7 +74,6 @@ const userModel = mongoose.model("user", userSchema)
 const adminModel = mongoose.model("admin", adminSchema)
 const courseModel = mongoose.model("course", couserSchema)
 const purchaseModel = mongoose.model("puchases", purchaseSchema)
-
 module.exports = {
     userModel,
     adminModel,
