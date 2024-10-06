@@ -1,13 +1,19 @@
-const API_URL = 'http://localhost:3001/todos';
+const API_URL = 'http://localhost:3000/todos';
+
 
 // Fetch existing todos when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-  // fetch todos
+document.addEventListener('DOMContentLoaded', async () => {
+    fetchTodos();
+
+
 });
 
 // Fetch todos from backend
-function fetchTodos() {
-    //  write here
+async function fetchTodos() {
+    const todo = await fetch(API_URL)
+
+
+    console.log(todo);
 }
 
 // Add a new todo to the DOM
@@ -17,12 +23,13 @@ function addTodoToDOM(todo) {
 
 // Add a new todo
 document.getElementById('add-todo-btn').addEventListener('click', () => {
-    //  write here
+
+
 });
 
 // Toggle todo completion
 function toggleTodo(id, completed) {
-//    write here
+    //    write here
 }
 
 // Delete a todo
