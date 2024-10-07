@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-mongoose.connect(process.env.MONGODB_URL)
+
+mongoose.connect(process.env.MONGODB_URL);
+
 const userSchema = new Schema({
     email: {
         type: String,
@@ -65,11 +67,16 @@ const purchaseSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "user"
     },
-    courseId: {
-        type: Schema.Types.ObjectId,
-        ref: "course"
-    }
-})
+    courses: [
+        {
+            courseId: {
+                type: Schema.Types.ObjectId,
+                ref: "course"
+            }
+        }
+    ]
+}, { timestamps: true });
+
 const userModel = mongoose.model("user", userSchema)
 const adminModel = mongoose.model("admin", adminSchema)
 const courseModel = mongoose.model("course", couserSchema)
