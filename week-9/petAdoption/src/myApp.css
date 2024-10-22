@@ -18,7 +18,7 @@
     background-color: #c59771bd;
     max-width: 550px;
     margin: 20px auto;
-    padding: 30px;
+    padding: 20px;
     text-align: left;
     border-radius: 3px;
     box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.4);
@@ -59,8 +59,11 @@
   input[type="password"] {
     display: block;
     width: 100%;
-    padding: 10px;
+    padding: 7px;
     font-family: inherit;
+    outline: none;
+    border-radius: 6px;
+    border: 1px solid rgb(165, 165, 165);
   }
   
   button {
@@ -73,7 +76,7 @@
     border-radius: 2px;
     font-size: 16px;
     font-family: inherit;
-    margin: 20px 0 10px 0;
+    margin: 20px 0 0px 0;
   
   }
   
