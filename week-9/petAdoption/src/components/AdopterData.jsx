@@ -13,7 +13,7 @@ const AdopterData = () => {
         flexDirection: "column",
       }}
     >
-      <table
+      <table 
         style={{
           borderCollapse: "collapse",
           width: "100%",

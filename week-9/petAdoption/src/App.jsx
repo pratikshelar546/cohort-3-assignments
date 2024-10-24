@@ -7,7 +7,7 @@ import AdopterData from "./components/AdopterData";
 export const PetContext = createContext();
 const App = () => {
   const [formData, setFormData] = useState([]);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(true);
 
   return (
     <div

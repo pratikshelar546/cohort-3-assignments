@@ -1,12 +1,16 @@
+import { useContext } from "react";
 import "./header.css";
+import { PetContext } from "../App";
 
 const Header = () => {
+  const { showForm, setShowForm } = useContext(PetContext);
+
   return (
     <div className="header">
       <ul className="header-list">
         <li>Pet Adoption</li>
-        <li>Form</li>
-        <li>Table</li>
+        <li onClick={() => setShowForm(true)}>Form</li>
+        <li onClick={() => setShowForm(false)}>Table</li>
       </ul>
     </div>
   );
