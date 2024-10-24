@@ -54,7 +54,7 @@ const Timer = () => {
     } else {
       // Start editing - remove leading zeros
       setIsRunning(false); // Pause the timer while editing
-      setEditState({ field, value: formatTime(time)[field].replace(/^0+/, '') }); // Set field and remove leading zeros for easier editing
+      setEditState({ field, value:  }); // Set field and remove leading zeros for easier editing
 
     }
   };

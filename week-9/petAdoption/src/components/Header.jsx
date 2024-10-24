@@ -3,7 +3,7 @@ import "./header.css";
 import { PetContext } from "../App";
 
 const Header = () => {
-  const { showForm, setShowForm } = useContext(PetContext);
+  const {  setShowForm } = useContext(PetContext);
 
   return (
     <div className="header">
