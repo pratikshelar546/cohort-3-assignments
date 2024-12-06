@@ -1,49 +1,45 @@
+
 import { WebSocketServer, WebSocket } from "ws";
 
 const wss = new WebSocketServer({ port: 8080 });
 
-interface Users {
-  socket: WebSocket;
-  room: string;
+interface User {
+    socket: WebSocket;
+    room: string;
 }
-let allSocket: Users[] = [];
 
-// const message = {
-//   type: "join",
-//   payload: {
-//     roomId: "red",
-//   },
-// };
+let allSockets: User[] = [];
 
-// const message = {
-//   type: "chat",
-//   payload: {
-//     message: "hello",
-//   },
-// };
+wss.on("connection", (socket) => {
 
-wss.on("connection", function (socket) {
-  socket.on("message", (message) => {
-    // @ts-ignore
-    const parseMessage = JSON.parse(message);
-
-    if (parseMessage.type == "join") {
-      allSocket.push({
-        socket: socket,
-        room: parseMessage.payload.room,
-      });
-    }
-
-    if (parseMessage.type == "chat") {
-      const currentUserRoom = allSocket.find((x) => x.socket == socket)?.room;
-
-      allSocket.map((user) => {
-        if (user.room == currentUserRoom) {
-          console.log("true");
-
-          user.socket.send(parseMessage.payload.message);
+    socket.on("message", (message) => {
+        // @ts-ignore
+        const parsedMessage = JSON.parse(message);
+        if (parsedMessage.type == "join") {
+            console.log("user joined room " + parsedMessage.payload.roomId);
+            allSockets.push({
+                socket,
+                room: parsedMessage.payload.roomId
+            })
         }
-      });
-    }
-  });
-});
+
+        if (parsedMessage.type == "chat") {
+            console.log("user wants to chat");
+            // const currentUserRoom = allSockets.find((x) => x.socket == socket).room
+            let currentUserRoom = null;
+            for (let i = 0; i < allSockets.length; i++) {
+                if (allSockets[i].socket == socket) {
+                    currentUserRoom = allSockets[i].room
+                }
+            }
+
+            for (let i = 0; i < allSockets.length; i++) {
+                if (allSockets[i].room == currentUserRoom) {
+                    allSockets[i].socket.send(parsedMessage.payload.message)
+                }
+            }
+        }
+
+    })
+
+})
