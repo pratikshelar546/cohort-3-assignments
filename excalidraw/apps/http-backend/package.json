@@ -1,5 +1,5 @@
 {
-  "name": "@repo/http-backend",
+  "name": "http-backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,7 +11,9 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@repo/backend-comman": "workspace:*"
+    "@repo/backend-comman": "workspace:*",
+    "@repo/comman": "workspace:*",
+    "@repo/database": "workspace:*"
   },
   "keywords": [],
   "author": "",
