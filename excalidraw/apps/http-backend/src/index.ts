@@ -18,13 +18,14 @@ app.use("/signin", async (req, res) => {
             })
             return
         }
-        const ExistUser = await prismaClient.user.findFirst({ where:{
-            name: parseData.data.name, password: parseData.data.password
-        } })
-        console.log(ExistUser);
+        const ExistUser = await prismaClient.user.findFirst({
+            where: {
+                name: parseData.data.name, password: parseData.data.password
+            }
+        })
         const token = jwt.sign({
-            userId:ExistUser?.id,
-        },JWT_SECRET)
+            userId: ExistUser?.id,
+        }, JWT_SECRET)
         res.status(200).json({
             message: "user",
             data: token
@@ -71,35 +72,61 @@ app.use("/signup", async (req, res) => {
     }
 });
 
-app.use("/createRoom", middleware,async (req, res) => {
-try {
+app.use("/createRoom", middleware, async (req, res) => {
+    console.log("hit");
+
     const parseData = CreateRoomSchema.safeParse(req.body);
-    if(!parseData.success){
+    if (!parseData.success) {
         res.status(400).json({
-            message:"Data invalid"
+            message: "Data invalid"
         })
         return
     }
     // @ts-ignore
     const userId = req.userId;
 
-    const createRoom = await prismaClient.room.create({
-        data:{
-            slug:parseData.data?.name,
-            adminId:userId
-        }
-    })
+    try {
+        const createRoom = await prismaClient.room.create({
+            data: {
+                slug: parseData.data?.name,
+                adminId: userId
+            }
+        })
 
-    res.status(200).json({
-        message:"room created",
-        roomId:createRoom.id
-    })
-} catch (error) {
-    console.log("error", error);
-    res.status(411).json({
-        error
-    })
-    
-}
+
+        res.status(200).json({
+            message: "room created",
+            roomId: createRoom.id
+        })
+        return
+
+    } catch (error) {
+        console.log("error", error);
+        res.status(411).json({
+            message: "room already exits with that"
+        })
+        return
+    }
 });
+
+
+app.get("/chat/:roomId", async(req,res)=>{
+
+const roomId = Number(req.params.roomId);
+
+const messages = await prismaClient.chats.findMany({
+    where:{
+        roomId:roomId
+    },
+    orderBy:{
+        id:"desc"
+    },
+    take:10
+})
+
+res.status(200).json({
+    message:"all mesaage",
+    messages:messages
+})
+})
 app.listen(3001);
