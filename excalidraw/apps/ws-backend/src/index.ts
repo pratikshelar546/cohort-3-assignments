@@ -56,7 +56,16 @@ users.push({
 })
 
 ws.on("message", async function(data){
-    const parseData = JSON.parse(data as unknown as string);
+    let parseData;
+    console.log(data);
+    
+    if(typeof data !=="string"){
+        parseData = JSON.parse(data.toString());
+    }else{
+parseData = JSON.parse(data );
+    }
+    console.log(parseData);
+    
 
     if(parseData.type === "join_room"){
        const user = users.find(user=>user.ws === ws);
