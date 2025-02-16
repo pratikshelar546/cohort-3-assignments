@@ -4,11 +4,12 @@ import { prismaClient } from "@repo/database/client";
 import { CreateRoomSchema, CreateUSerSchema, SignInSchema } from '@repo/comman/types';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from "@repo/backend-comman/config";
+import cors from 'cors';
 
 const app = express();
 
 app.use(express.json());
-
+app.use(cors())
 app.use("/signin", async (req, res) => {
     try {
         const parseData = SignInSchema.safeParse(req.body);
@@ -20,17 +21,28 @@ app.use("/signin", async (req, res) => {
         }
         const ExistUser = await prismaClient.user.findFirst({
             where: {
-                name: parseData.data.name, password: parseData.data.password
+                AND: [
+
+                    { name: parseData.data.name }, { password: parseData.data.password }
+                ]
             }
         })
+        if (ExistUser === null) {
+            res.status(400).json({
+                message: "Invalid credentials",
+                success: false
+            })
+            return
+        }
+
         const token = jwt.sign({
             userId: ExistUser?.id,
         }, JWT_SECRET)
         res.status(200).json({
             message: "user",
-            data: token
+            token: token
         })
-
+        return
     } catch (error) {
         console.log("error", error);
         res.status(400).json({
@@ -110,23 +122,51 @@ app.use("/createRoom", middleware, async (req, res) => {
 });
 
 
-app.get("/chat/:roomId", async(req,res)=>{
+app.get("/chat/:roomId", async (req, res) => {
 
-const roomId = Number(req.params.roomId);
+    const roomId = Number(req.params.roomId);
 
-const messages = await prismaClient.chats.findMany({
-    where:{
-        roomId:roomId
-    },
-    orderBy:{
-        id:"desc"
-    },
-    take:10
+    const messages = await prismaClient.chats.findMany({
+        where: {
+            roomId: roomId
+        },
+        orderBy: {
+            id: "desc"
+        },
+        take: 10
+    })
+
+    res.status(200).json({
+        message: "all mesaage",
+        messages: messages
+    })
 })
 
-res.status(200).json({
-    message:"all mesaage",
-    messages:messages
+app.get("/room/:slug", async (req, res) => {
+
+    try {
+
+        const slug = req.params.slug;
+        console.log(slug);
+
+        const room = await prismaClient.room.findFirst({
+            where: {
+                slug: slug
+            }
+        })
+        console.log(room, "this is rooom");
+
+
+        res.status(200).json({
+            message: "room details",
+            data: room
+        })
+        return
+    } catch (error) {
+        res.status(500).json({
+            error
+        })
+        return
+    }
 })
-})
-app.listen(3001);
+app.listen(5001);
