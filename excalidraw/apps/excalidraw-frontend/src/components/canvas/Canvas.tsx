@@ -8,7 +8,7 @@ export default function Canvas({ roomId, socket }: { roomId: string, socket: Web
             const canvas = canvasRef.current;
             initDraw(canvas,socket, roomId);
         }
-    }, [canvasRef])
+    }, [canvasRef,roomId])
     return (
         <>
             <div className="w-screen h-screen bg-white">

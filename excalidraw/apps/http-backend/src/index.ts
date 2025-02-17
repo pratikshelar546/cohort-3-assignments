@@ -105,6 +105,7 @@ app.use("/createRoom", middleware, async (req, res) => {
             }
         })
 
+console.log(createRoom);
 
         res.status(200).json({
             message: "room created",
@@ -133,7 +134,7 @@ app.get("/chat/:roomId", async (req, res) => {
         orderBy: {
             id: "desc"
         },
-        take: 10
+        take: 50
     })
 
     res.status(200).json({
