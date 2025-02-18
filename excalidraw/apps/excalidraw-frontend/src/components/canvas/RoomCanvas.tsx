@@ -13,7 +13,6 @@ export default function RoomCanvas({ roomId }: { roomId: string }) {
 
     return (
         <>
-            <h1 className="text-center font-bold text-2xl">Excali draw</h1>
             {socket && <Canvas roomId={roomId} socket={socket} />}
         </>
     )

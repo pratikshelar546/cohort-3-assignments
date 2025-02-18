@@ -19,7 +19,7 @@ type shape = {
 export async function initDraw(canvas: HTMLCanvasElement, socket: WebSocket, roomId: string) {
     const ctx = canvas.getContext("2d");
     const existingCanvas: shape[] = await getExistingShape(roomId);
-    const type: 'circle' | 'rect' = "circle"
+    const type: 'circle' | 'rect' = "rect"
     if (!ctx) return;
 
     socket.onmessage = (event) => {
@@ -149,13 +149,9 @@ function clearCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, e
     })
 }
 
-async function getExistingShape(roomId: string) {
+export async function getExistingShape(roomId: string) {
     const response = await axios.get(`${BACKEND_URL}/chat/${roomId}`)
-    console.log(response.data);
-
     const message = response.data.messages;
-    console.log(message);
-
     const shapes = message.map((x: { message: string }) => {
         console.log(x, "fromshaps");
 
