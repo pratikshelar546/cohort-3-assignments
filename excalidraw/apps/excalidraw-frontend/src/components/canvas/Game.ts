@@ -94,6 +94,8 @@ export class Game {
                 centerY: this.startY + radius,
                 radius
             }
+        } else if (selectedTool === 'pencli') {
+
         }
         if (!shape) return
         this.existingShapes.push(shape)
@@ -110,12 +112,14 @@ export class Game {
             const width = e.clientX - this.startX;
             const height = e.clientY - this.startY;
             const selectedTool = this.selectedTool;
-            this.clearCanvas();
+
             this.ctx.strokeStyle = "rgba(255,255,255)"
             if (selectedTool === "rect") {
+                this.clearCanvas();
                 this.ctx.strokeRect(this.startX, this.startY, width, height)
             }
             else if (selectedTool === "circle") {
+                this.clearCanvas();
                 const radius = Math.max(width, height) / 2;
                 const centerX = this.startX + radius;
                 const centerY = this.startY + radius;
@@ -123,6 +127,22 @@ export class Game {
                 this.ctx.arc(centerX, centerY, Math.abs(radius), 0, Math.PI * 2);
                 this.ctx.stroke();
                 this.ctx.closePath();
+
+            } else if (selectedTool === "pencli") {
+                this.ctx.lineWidth = 2
+                this.ctx.lineCap = 'round'
+                const startFrom = e.clientX - this.canvas.offsetLeft
+                const startTo = e.clientY - this.canvas.offsetTop
+                // startFrom += Math.random() * 2 - 1
+                // startTo += Math.random() * 2 - 1
+                this.ctx.beginPath()
+                this.ctx.moveTo(this.startX, this.startY)
+                this.ctx.lineTo(startFrom, startTo)
+                this.ctx.stroke()
+                // this.ctx.closePath();
+                this.startX = e.clientX
+                this.startY = e.clientY
+                console.log(startFrom, startTo);
 
             }
         }
