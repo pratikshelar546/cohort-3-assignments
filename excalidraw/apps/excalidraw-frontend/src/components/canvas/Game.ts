@@ -11,6 +11,7 @@ export class Game {
     private startX = 0
     private startY = 0
     private selectedTool: Tool = 'circle'
+    private path: [{ x: number, y: number }] | []
     socket: WebSocket
     constructor(canvas: HTMLCanvasElement, socket: WebSocket, roomId: string) {
         this.ctx = canvas.getContext("2d")!;
@@ -22,6 +23,7 @@ export class Game {
         this.init();
         this.initHandler();
         this.initMouseHandler();
+        this.path = [];
 
 
     }
@@ -45,6 +47,21 @@ export class Game {
                 this.ctx.arc(shape.centerX, shape.centerY, Math.abs(shape.radius), 0, Math.PI * 2)
                 this.ctx.stroke();
                 this.ctx.closePath();
+            } else if (shape.type === 'pencil') {
+                this.ctx.lineWidth = shape.line
+                this.ctx.lineCap = 'round'
+                const path = shape.path || [];
+
+                if (path.length > 1) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(path[0].x, path[0].y);
+
+                    path.forEach(point => {
+                        this.ctx.lineTo(point.x, point.y)
+                    });
+                    this.ctx.stroke();
+                    this.ctx.closePath();
+                }
             }
         })
     }
@@ -66,9 +83,10 @@ export class Game {
     }
     // @ts-ignore
     mouseDownHandler = (e) => {
-        this.clicked = true
+        this.clicked = true;
         this.startX = e.clientX;
-        this.startY = e.clientY
+        this.startY = e.clientY;
+
     }
     // @ts-ignore
     mouseUpHandler = (e) => {
@@ -96,14 +114,22 @@ export class Game {
             }
         } else if (selectedTool === 'pencli') {
 
+            shape = {
+                type: 'pencil',
+                path: this.path,
+                line: 2
+            }
+
         }
         if (!shape) return
         this.existingShapes.push(shape)
+
         this.socket.send(JSON.stringify({
             type: "chat",
             message: JSON.stringify(shape),
             roomId: Number(this.roomId)
         }))
+        this.path = [];
 
     }
     // @ts-ignore
@@ -133,8 +159,8 @@ export class Game {
                 this.ctx.lineCap = 'round'
                 const startFrom = e.clientX - this.canvas.offsetLeft
                 const startTo = e.clientY - this.canvas.offsetTop
-                // startFrom += Math.random() * 2 - 1
-                // startTo += Math.random() * 2 - 1
+                
+                this.path.push({ x: startFrom, y: startTo })
                 this.ctx.beginPath()
                 this.ctx.moveTo(this.startX, this.startY)
                 this.ctx.lineTo(startFrom, startTo)
@@ -142,7 +168,21 @@ export class Game {
                 // this.ctx.closePath();
                 this.startX = e.clientX
                 this.startY = e.clientY
-                console.log(startFrom, startTo);
+
+            }
+            else if(selectedTool === "triangle"){
+                console.log("tirhdh");
+                
+                const width = this.canvas.width;
+                const height = this.canvas.height;
+                const mouseX = e.clientX - this.canvas.offsetLeft;
+    const mouseY = e.clientY - this.canvas.offsetTop;
+                this.ctx.beginPath();
+                this.ctx.moveTo(mouseX + 50, mouseY);  // Point 1 (right point)
+                this.ctx.lineTo(mouseX, mouseY - 50);  // Point 2 (top point)
+                this.ctx.lineTo(mouseX - 50, mouseY); 
+                this.ctx.stroke()   
+                this.ctx.closePath()
 
             }
         }

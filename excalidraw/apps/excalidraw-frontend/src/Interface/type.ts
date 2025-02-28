@@ -10,6 +10,10 @@ export type Shape = {
     centerY: number,
     radius: number
 
+} | {
+    type: 'pencil',
+    path: [{ x: number, y: number }],
+    line: number
 }
 
-export type Tool = 'circle' | 'rect' | 'pencli' |'triangle'
+export type Tool = 'circle' | 'rect' | 'pencli' | 'triangle'
