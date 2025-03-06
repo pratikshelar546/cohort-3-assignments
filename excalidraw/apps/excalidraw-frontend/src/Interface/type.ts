@@ -14,6 +14,12 @@ export type Shape = {
     type: 'pencil',
     path: [{ x: number, y: number }],
     line: number
+} | {
+    type: "triangle",
+    x: number,
+    y: number,
+    base: number,
+    height: number
 }
 
-export type Tool = 'circle' | 'rect' | 'pencli' | 'triangle'
+export type Tool = 'circle' | 'rect' | 'pencli' | 'triangle' | 'select'

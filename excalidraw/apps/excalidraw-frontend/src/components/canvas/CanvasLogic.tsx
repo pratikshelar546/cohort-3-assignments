@@ -151,12 +151,26 @@ function clearCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, e
 
 export async function getExistingShape(roomId: string) {
     const response = await axios.get(`${BACKEND_URL}/chat/${roomId}`)
+
     const message = response.data.messages;
-    const shapes = message.map((x: { message: string }) => {
+
+    const shapes = message?.map((x: { message: string }) => {
         // console.log(x, "fromshaps");
 
         const data = JSON.parse(x.message)
-        return data
+        const parseData = { ...x, message: data }
+
+        return parseData
     })
+    console.log(shapes);
+
     return shapes
+}
+
+export async function deleteShape(id: number) {
+    const response = await axios.delete(`${BACKEND_URL}/chat/${id}`)
+    console.log(response);
+
+
+
 }

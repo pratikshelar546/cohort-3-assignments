@@ -1,4 +1,4 @@
-import express from "express";
+import express, { json } from "express";
 import { middleware } from "./middleware/middleware";
 import { prismaClient } from "@repo/database/client";
 import { CreateRoomSchema, CreateUSerSchema, SignInSchema } from '@repo/comman/types';
@@ -105,7 +105,6 @@ app.use("/createRoom", middleware, async (req, res) => {
             }
         })
 
-console.log(createRoom);
 
         res.status(200).json({
             message: "room created",
@@ -168,6 +167,37 @@ app.get("/room/:slug", async (req, res) => {
             error
         })
         return
+    }
+})
+
+app.delete("/chat/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(id);
+
+        const allChats = await prismaClient.chats.findFirst({
+            where: {
+                id: Number(id)
+            }
+        });
+        const findMessageAndDelete = await prismaClient.chats.deleteMany({
+            where: {
+                id: Number(id), // Message must match exactly
+            }
+        });
+        console.log(allChats, "all chats");
+
+        console.log(findMessageAndDelete, "deleeyd");
+
+        res.status(200).json({
+            message: "message deleted"
+        })
+        return
+
+    } catch (error) {
+        console.log("deleting chat")
+        console.log(error);
+
     }
 })
 app.listen(5001);
